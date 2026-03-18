@@ -5,7 +5,7 @@ describe('User API', () => {
 
   test('GET /api/users retourne tous les utilisateurs', async () => {
     const response = await request(app).get('/api/users');
-    expect(response.status).toBe(500);
+    expect(response.status).toBe(200);
     expect(Array.isArray(response.body)).toBe(true);
     expect(response.body.length).toBeGreaterThan(0);
   });
