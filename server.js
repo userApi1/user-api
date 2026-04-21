@@ -36,4 +36,23 @@ app.post('/api/users', (req, res) => {
   res.status(201).json(newUser);
 });
 
+app.get('/health', (req, res) => {
+  res.json({
+    status: 'OK',
+    timestamp: new Date().toISOString()
+  });
+});
+
+const PORT = process.env.PORT || 3000;
+const server = app.listen(PORT, '0.0.0.0', () => {
+  console.log(`Server running on port ${PORT}`);
+  console.log(`Env: ${process.env.NODE_ENV || 'dev'}`);
+});
+
+
 module.exports = app;
+
+process.on('SIGTERM', () => {
+  console.log('SIGTERM: closing server');
+  server.close(() => console.log('Server closed'));
+});
