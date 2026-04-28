@@ -94,12 +94,9 @@ jobs:
           docker push $ECR_REGISTRY/user-api:latest
 
       - name: Deploy to Amazon ECS
-        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
-        with:
-          task-definition-family: my-app-task
-          container-name: my-app-task:4          # ← Change si le nom du conteneur dans ta Task Definition est différent
-          image: ${{ steps.login-ecr.outputs.registry }}/user-api:latest
-          cluster: my-cluster
-          service: my-app-service
-          region: eu-west-1
-          force-new-deployment: true
+        run: |
+          aws ecs update-service \
+            --cluster user-api-cluster \
+            --service user-api-service \
+            --force-new-deployment \
+            --region eu-west-1
