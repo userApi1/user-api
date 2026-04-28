@@ -93,10 +93,20 @@ jobs:
           docker push $ECR_REGISTRY/user-api:$IMAGE_TAG
           docker push $ECR_REGISTRY/user-api:latest
 
-      - name: Deploy to Amazon ECS
+      - name: Update Task Definition and Deploy to ECS
         run: |
+          TASK_FAMILY="my-app-task"
+
+          # Créer une nouvelle révision de Task Definition avec la nouvelle image
+          aws ecs register-task-definition \
+            --family $TASK_FAMILY \
+            --cli-input-json "$(aws ecs describe-task-definition --task-definition $TASK_FAMILY --query 'taskDefinition' | jq 'del(.taskDefinitionArn, .revision, .status, .requiresAttributes, .compatibilities, .registeredAt, .registeredBy)' | jq '.containerDefinitions[0].image = \"'"$ECR_REGISTRY/user-api:latest"'\"' )" \
+            --region eu-west-1
+
+          # Déployer le service avec la nouvelle révision
           aws ecs update-service \
             --cluster my-cluster \
             --service my-app-service \
+            --task-definition $TASK_FAMILY \
             --force-new-deployment \
             --region eu-west-1
