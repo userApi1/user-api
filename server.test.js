@@ -1,6 +1,16 @@
 const request = require('supertest');
 const app = require('./server');
 
+let server;
+
+beforeAll(() => {
+  server = app.listen(0); // port aléatoire pour les tests
+});
+
+afterAll((done) => {
+  server.close(done);
+});
+
 describe('User API', () => {
 
   test('GET /api/users retourne tous les utilisateurs', async () => {
@@ -37,6 +47,20 @@ describe('User API', () => {
       .post('/api/users')
       .send({ name: 'Test' });
     expect(response.status).toBe(400);
+  });
+
+  test('POST /api/users retourne 400 sans name', async () => {
+  const response = await request(app)
+    .post('/api/users')
+    .send({ email: 'test@example.com' });
+  expect(response.status).toBe(400);
+  });
+
+  test('GET /health retourne status OK', async () => {
+  const response = await request(app).get('/health');
+  expect(response.status).toBe(200);
+  expect(response.body.status).toBe('OK');
+  expect(response.body).toHaveProperty('timestamp');
   });
 
 });

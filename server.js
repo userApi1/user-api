@@ -7,12 +7,10 @@ let users = [
   { id: 2, name: 'Bob', email: 'bob@example.com' }
 ];
 
-// GET tous les utilisateurs
 app.get('/api/users', (req, res) => {
   res.json(users);
 });
 
-// GET un utilisateur par ID
 app.get('/api/users/:id', (req, res) => {
   const user = users.find(u => u.id === parseInt(req.params.id));
   if (!user) {
@@ -21,7 +19,6 @@ app.get('/api/users/:id', (req, res) => {
   res.json(user);
 });
 
-// POST créer un utilisateur
 app.post('/api/users', (req, res) => {
   const { name, email } = req.body;
   if (!name || !email) {
@@ -43,16 +40,19 @@ app.get('/health', (req, res) => {
   });
 });
 
-const PORT = process.env.PORT || 3000;
-const server = app.listen(PORT, '0.0.0.0', () => {
-  console.log(`Server running on port ${PORT}`);
-  console.log(`Env: ${process.env.NODE_ENV || 'dev'}`);
-});
-
-
+// module.exports AVANT le if, pour que Jest puisse importer sans démarrer
 module.exports = app;
 
-process.on('SIGTERM', () => {
-  console.log('SIGTERM: closing server');
-  server.close(() => console.log('Server closed'));
-});
+/* istanbul ignore next */
+if (require.main === module) {
+  const PORT = process.env.PORT || 3000;
+  const server = app.listen(PORT, '0.0.0.0', () => {
+    console.log(`Server running on port ${PORT}`);
+    console.log(`Env: ${process.env.NODE_ENV || 'dev'}`);
+  });
+
+  process.on('SIGTERM', () => {
+    console.log('SIGTERM: closing server');
+    server.close(() => console.log('Server closed'));
+  });
+}
