@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>User API — Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0f0f0f;
+      --surface: #1a1a1a;
+      --surface2: #222222;
+      --border: #2e2e2e;
+      --text: #f0f0f0;
+      --text-muted: #888;
+      --text-dim: #555;
+      --accent: #00e5a0;
+      --accent-dim: rgba(0,229,160,0.12);
+      --accent-dim2: rgba(0,229,160,0.06);
+      --danger: #ff5c5c;
+      --danger-dim: rgba(255,92,92,0.12);
+      --warn: #f0a500;
+      --warn-dim: rgba(240,165,0,0.12);
+      --radius: 10px;
+      --radius-sm: 6px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 0;
+    }
+
+    /* TOPBAR */
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 18px 32px;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface);
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .logo-icon {
+      width: 32px;
+      height: 32px;
+      background: var(--accent);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .logo-icon svg { width: 18px; height: 18px; }
+
+    .logo-text {
+      font-size: 15px;
+      font-weight: 500;
+      letter-spacing: -0.3px;
+    }
+
+    .logo-sub {
+      font-size: 12px;
+      color: var(--text-muted);
+      font-family: 'DM Mono', monospace;
+    }
+
+    .topbar-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .status-pill {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 12px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 500;
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      transition: all 0.3s;
+    }
+
+    .status-pill.online {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: var(--accent-dim2);
+    }
+
+    .status-pill.offline {
+      border-color: var(--danger);
+      color: var(--danger);
+      background: var(--danger-dim);
+    }
+
+    .dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: currentColor;
+    }
+
+    .dot.pulse {
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+
+    .btn-refresh {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 16px;
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text-muted);
+      font-size: 13px;
+      cursor: pointer;
+      font-family: 'DM Sans', sans-serif;
+      transition: all 0.2s;
+    }
+
+    .btn-refresh:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: var(--accent-dim2);
+    }
+
+    .btn-refresh svg {
+      width: 14px;
+      height: 14px;
+    }
+
+    .btn-refresh.spinning svg {
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* MAIN */
+    .main {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 32px 32px;
+    }
+
+    /* METRICS */
+    .metrics {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+      margin-bottom: 28px;
+    }
+
+    .metric-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px 22px;
+      transition: border-color 0.3s;
+    }
+
+    .metric-card:hover { border-color: #444; }
+
+    .metric-label {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: var(--text-dim);
+      margin-bottom: 10px;
+    }
+
+    .metric-value {
+      font-size: 28px;
+      font-weight: 300;
+      color: var(--text);
+      letter-spacing: -1px;
+      line-height: 1;
+    }
+
+    .metric-value.accent { color: var(--accent); }
+
+    .metric-sub {
+      font-size: 12px;
+      color: var(--text-dim);
+      margin-top: 6px;
+      font-family: 'DM Mono', monospace;
+    }
+
+    /* GRID */
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 380px;
+      gap: 14px;
+      align-items: start;
+    }
+
+    /* CARDS */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+
+    .card-header {
+      padding: 16px 22px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .card-title {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+    }
+
+    .card-count {
+      font-size: 11px;
+      font-family: 'DM Mono', monospace;
+      color: var(--text-dim);
+      background: var(--surface2);
+      padding: 2px 8px;
+      border-radius: 4px;
+    }
+
+    /* TABLE */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    th {
+      text-align: left;
+      font-size: 11px;
+      color: var(--text-dim);
+      font-weight: 400;
+      padding: 10px 22px;
+      border-bottom: 1px solid var(--border);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    td {
+      padding: 13px 22px;
+      font-size: 13px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text);
+    }
+
+    tr:last-child td { border-bottom: none; }
+
+    tr:hover td { background: var(--surface2); }
+
+    .user-cell {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .avatar {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background: var(--accent-dim);
+      border: 1px solid rgba(0,229,160,0.25);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--accent);
+      flex-shrink: 0;
+    }
+
+    .email-text { color: var(--text-muted); font-family: 'DM Mono', monospace; font-size: 12px; }
+
+    .id-badge {
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      color: var(--text-dim);
+      background: var(--surface2);
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+
+    /* SIDEBAR */
+    .sidebar { display: flex; flex-direction: column; gap: 14px; }
+
+    /* FORM */
+    .form-body { padding: 20px 22px; }
+
+    .field { margin-bottom: 14px; }
+
+    .field label {
+      display: block;
+      font-size: 11px;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 6px;
+    }
+
+    .field input {
+      width: 100%;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 9px 12px;
+      font-size: 13px;
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .field input:focus { border-color: var(--accent); }
+    .field input::placeholder { color: var(--text-dim); }
+
+    .btn-submit {
+      width: 100%;
+      background: var(--accent);
+      color: #000;
+      border: none;
+      border-radius: var(--radius-sm);
+      padding: 10px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      font-family: 'DM Sans', sans-serif;
+      transition: opacity 0.2s, transform 0.1s;
+    }
+
+    .btn-submit:hover { opacity: 0.85; }
+    .btn-submit:active { transform: scale(0.98); }
+
+    .toast {
+      margin-top: 10px;
+      font-size: 12px;
+      padding: 8px 12px;
+      border-radius: var(--radius-sm);
+      display: none;
+    }
+
+    .toast-ok { background: var(--accent-dim); color: var(--accent); border: 1px solid rgba(0,229,160,0.25); }
+    .toast-err { background: var(--danger-dim); color: var(--danger); border: 1px solid rgba(255,92,92,0.2); }
+
+    /* HEALTH */
+    .health-body { padding: 16px 22px; }
+
+    .health-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 12px;
+    }
+
+    .health-row:last-child { border-bottom: none; }
+    .health-key { color: var(--text-dim); font-family: 'DM Mono', monospace; }
+    .health-val { color: var(--text); font-family: 'DM Mono', monospace; font-size: 11px; }
+    .health-val.ok { color: var(--accent); }
+    .health-val.err { color: var(--danger); }
+
+    /* EMPTY / LOADING */
+    .empty-row td {
+      color: var(--text-dim);
+      font-size: 12px;
+      text-align: center;
+      padding: 32px;
+    }
+
+    @media (max-width: 768px) {
+      .grid { grid-template-columns: 1fr; }
+      .metrics { grid-template-columns: 1fr; }
+      .main { padding: 20px 16px; }
+      .topbar { padding: 14px 16px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="logo">
+    <div class="logo-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2.5" stroke-linecap="round">
+        <circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
+      </svg>
+    </div>
+    <div>
+      <div class="logo-text">User API</div>
+      <div class="logo-sub">Dashboard</div>
+    </div>
+  </div>
+  <div class="topbar-right">
+    <div class="status-pill" id="status-pill">
+      <span class="dot" id="status-dot"></span>
+      <span id="status-text">Vérification...</span>
+    </div>
+    <button class="btn-refresh" id="btn-refresh" onclick="loadAll()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+        <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 21h5v-5"/>
+      </svg>
+      Actualiser
+    </button>
+  </div>
+</div>
+
+<div class="main">
+
+  <div class="metrics">
+    <div class="metric-card">
+      <div class="metric-label">Total utilisateurs</div>
+      <div class="metric-value accent" id="count">—</div>
+      <div class="metric-sub">enregistrés</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-label">Statut API</div>
+      <div class="metric-value" id="api-status">—</div>
+      <div class="metric-sub" id="api-sub">en attente</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-label">Dernière vérification</div>
+      <div class="metric-value" style="font-size:18px;letter-spacing:-0.5px" id="last-check">—</div>
+      <div class="metric-sub" id="last-date">—</div>
+    </div>
+  </div>
+
+  <div class="grid">
+
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">Utilisateurs</span>
+        <span class="card-count" id="table-count">0 entrées</span>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>Nom</th>
+            <th>Email</th>
+            <th>ID</th>
+          </tr>
+        </thead>
+        <tbody id="users-tbody">
+          <tr class="empty-row"><td colspan="3">Chargement des données...</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="sidebar">
+
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">Nouvel utilisateur</span>
+        </div>
+        <div class="form-body">
+          <div class="field">
+            <label>Nom</label>
+            <input type="text" id="inp-name" placeholder="Alice Martin">
+          </div>
+          <div class="field">
+            <label>Email</label>
+            <input type="text" id="inp-email" placeholder="alice@example.com">
+          </div>
+          <button class="btn-submit" onclick="addUser()">Ajouter l'utilisateur</button>
+          <div class="toast toast-ok" id="toast-ok">Utilisateur créé avec succès</div>
+          <div class="toast toast-err" id="toast-err">Nom et email requis</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">Health check</span>
+        </div>
+        <div class="health-body" id="health-body">
+          <div class="health-row">
+            <span class="health-key">status</span>
+            <span class="health-val" id="h-status">—</span>
+          </div>
+          <div class="health-row">
+            <span class="health-key">timestamp</span>
+            <span class="health-val" id="h-timestamp">—</span>
+          </div>
+          <div class="health-row">
+            <span class="health-key">endpoint</span>
+            <span class="health-val" id="h-endpoint">—</span>
+          </div>
+          <div class="health-row">
+            <span class="health-key">latence</span>
+            <span class="health-val" id="h-latency">—</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+  const API = '';
+
+  async function loadUsers() {
+    try {
+      const r = await fetch(API + '/api/users');
+      const users = await r.json();
+      document.getElementById('count').textContent = users.length;
+      document.getElementById('table-count').textContent = users.length + ' entrée' + (users.length > 1 ? 's' : '');
+      if (users.length === 0) {
+        document.getElementById('users-tbody').innerHTML = '<tr class="empty-row"><td colspan="3">Aucun utilisateur</td></tr>';
+        return;
+      }
+      document.getElementById('users-tbody').innerHTML = users.map(u => `
+        <tr>
+          <td><div class="user-cell">
+            <div class="avatar">${u.name.slice(0,2).toUpperCase()}</div>
+            <span>${u.name}</span>
+          </div></td>
+          <td><span class="email-text">${u.email}</span></td>
+          <td><span class="id-badge">#${u.id}</span></td>
+        </tr>`).join('');
+    } catch(e) {
+      document.getElementById('count').textContent = '—';
+      document.getElementById('users-tbody').innerHTML = '<tr class="empty-row"><td colspan="3">Impossible de joindre l\'API</td></tr>';
+    }
+  }
+
+  async function loadHealth() {
+    const t0 = Date.now();
+    try {
+      const r = await fetch(API + '/health');
+      const latency = Date.now() - t0;
+      const data = await r.json();
+      const pill = document.getElementById('status-pill');
+      const dot = document.getElementById('status-dot');
+      pill.className = 'status-pill online';
+      dot.className = 'dot pulse';
+      document.getElementById('status-text').textContent = 'En ligne';
+      document.getElementById('api-status').textContent = data.status;
+      document.getElementById('api-sub').textContent = 'opérationnel';
+      const d = new Date(data.timestamp);
+      document.getElementById('last-check').textContent = d.toLocaleTimeString('fr-FR');
+      document.getElementById('last-date').textContent = d.toLocaleDateString('fr-FR');
+      document.getElementById('h-status').textContent = data.status;
+      document.getElementById('h-status').className = 'health-val ok';
+      document.getElementById('h-timestamp').textContent = data.timestamp.slice(0,19).replace('T',' ');
+      document.getElementById('h-endpoint').textContent = '/health';
+      document.getElementById('h-latency').textContent = latency + ' ms';
+    } catch(e) {
+      const pill = document.getElementById('status-pill');
+      const dot = document.getElementById('status-dot');
+      pill.className = 'status-pill offline';
+      dot.className = 'dot';
+      document.getElementById('status-text').textContent = 'Hors ligne';
+      document.getElementById('api-status').textContent = 'Offline';
+      document.getElementById('h-status').textContent = 'error';
+      document.getElementById('h-status').className = 'health-val err';
+      document.getElementById('h-timestamp').textContent = '—';
+      document.getElementById('h-endpoint').textContent = '/health';
+      document.getElementById('h-latency').textContent = '—';
+    }
+  }
+
+  async function addUser() {
+    const name = document.getElementById('inp-name').value.trim();
+    const email = document.getElementById('inp-email').value.trim();
+    const toastOk = document.getElementById('toast-ok');
+    const toastErr = document.getElementById('toast-err');
+    toastOk.style.display = 'none';
+    toastErr.style.display = 'none';
+    if (!name || !email) { toastErr.style.display = 'block'; return; }
+    try {
+      const r = await fetch(API + '/api/users', {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({name, email})
+      });
+      if (r.ok) {
+        document.getElementById('inp-name').value = '';
+        document.getElementById('inp-email').value = '';
+        toastOk.style.display = 'block';
+        setTimeout(() => { toastOk.style.display = 'none'; }, 3000);
+        await loadUsers();
+      }
+    } catch(e) {
+      toastErr.textContent = 'Erreur réseau';
+      toastErr.style.display = 'block';
+    }
+  }
+
+  function loadAll() {
+    const btn = document.getElementById('btn-refresh');
+    btn.classList.add('spinning');
+    Promise.all([loadUsers(), loadHealth()]).finally(() => {
+      btn.classList.remove('spinning');
+    });
+  }
+
+  loadAll();
+  setInterval(loadHealth, 30000);
+</script>
+</body>
+</html>

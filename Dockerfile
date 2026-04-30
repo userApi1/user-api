@@ -1,6 +1,6 @@
 FROM node:18-alpine
 
-LABEL maintainer="student-project"
+LABEL maintainer="Abalo"
 LABEL description="User Management API"
 LABEL version="1.0.0"
 
